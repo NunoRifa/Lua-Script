@@ -416,7 +416,7 @@ local function createInteractiveButton(parent, text, subtext, layoutOrder)
 end
 
 -- Create Fly Button
-local localFlyButton = createInteractiveButton(homePage, "Flying", "You can activate it by pressing J/this botton", 3)
+local localFlyButton = createInteractiveButton(homePage, "Flying", "You can activate it by pressing N/this botton", 3)
 local flyIcon = Instance.new("TextLabel")
 flyIcon.Size = UDim2.new(0, 20, 1, 0)
 flyIcon.Position = UDim2.new(1, -35, 0, 0)
@@ -436,9 +436,8 @@ localFlyButton.MouseButton1Click:Connect(function()
     end
 end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.J then
+UserInputService.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.N then
 		toggles.EnableFlight = not toggles.EnableFlight
         flyIcon.Text = (flyIcon.Text == "OFF" and "ON" or "OFF")
         flyIcon.TextColor3 = flyIcon.Text == "ON" and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(80, 80, 80)
