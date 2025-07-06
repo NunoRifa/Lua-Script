@@ -320,7 +320,7 @@ sidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 end)
 
 --== Function ==--
-local toggles = { EnableFlight = false, EnableWalkSpeed = false }
+local toggles = { EnableFlight = false, EnableWalkSpeed = false, EnableAntiAFK = false }
 local options = { FlightSpeed = 50, WalkSpeed = 50 }
 local originalWalkSpeed = 16
 
@@ -547,6 +547,41 @@ localWalkSpeedButton.MouseButton1Click:Connect(function()
     walkSpeedIcon.TextColor3 = walkSpeedIcon.Text == "ON" and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(80, 80, 80)
     
     handleWalkSpeed()
+end)
+
+-- Create Anti AFK Button
+local localAntiAfkButton = createInteractiveButton(homePage, "Anti AFK", "-", 5)
+local AntiAfkIcon = Instance.new("TextLabel")
+AntiAfkIcon.Size = UDim2.new(0, 20, 1, 0)
+AntiAfkIcon.Position = UDim2.new(1, -35, 0, 0)
+AntiAfkIcon.Text = "OFF"
+AntiAfkIcon.Font = Enum.Font.SourceSansBold
+AntiAfkIcon.TextSize = 16
+AntiAfkIcon.TextColor3 = Color3.fromRGB(80, 80, 80)
+AntiAfkIcon.BackgroundTransparency = 1
+AntiAfkIcon.Parent = localAntiAfkButton
+
+localAntiAfkButton.MouseButton1Click:Connect(function()
+    toggles.EnableAntiAFK = not toggles.EnableAntiAFK
+    AntiAfkIcon.Text = (AntiAfkIcon.Text == "OFF" and "ON" or "OFF")
+    AntiAfkIcon.TextColor3 = AntiAfkIcon.Text == "ON" and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(80, 80, 80)
+
+    local GC = getconnections or get_signal_cons
+    if GC then
+        for i,v in pairs(GC(Players.LocalPlayer.Idled)) do
+            if v["Disable"] then
+				v["Disable"](v)
+			elseif v["Disconnect"] then
+				v["Disconnect"](v)
+			end
+        end
+    else
+        local VirtualUser = cloneref(game:GetService("VirtualUser"))
+		Players.LocalPlayer.Idled:Connect(function()
+			VirtualUser:CaptureController()
+			VirtualUser:ClickButton2(Vector2.new())
+		end)
+    end
 end)
 
 -- 9. Initialize by showing the "Home" page by default
