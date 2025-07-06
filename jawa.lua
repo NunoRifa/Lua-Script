@@ -370,6 +370,23 @@ function handleWalkSpeed()
     end
 end
 
+local autoRejoinLoop = nil
+function handleAutoRejoin()
+    while toggles.EnableAutoRejoin do
+        if not localPlayer.Character or not localPlayer.Character.Parent then
+            local success, err = pcall(function()
+                TeleportService:TeleportToPlaceInstance(PlaceId, JobId, localPlayer)
+            end)
+            if not success then
+                task.wait(5)
+            else
+                break
+            end
+        end
+        task.wait(1)
+    end
+end
+
 -- 8. Customize the "Home" page as per the image
 local homePage = pageFrames["Home"]
 
@@ -415,6 +432,56 @@ local function createInteractiveButton(parent, text, subtext, layoutOrder)
     return button
 end
 
+-- Create Rejoin Button
+local localRejoinButton = createInteractiveButton(homePage, "Rejoin", "-", 1)
+local RejoinIcon = Instance.new("TextLabel")
+RejoinIcon.Size = UDim2.new(0, 20, 1, 0)
+RejoinIcon.Position = UDim2.new(1, -35, 0, 0)
+RejoinIcon.Text = ""
+RejoinIcon.Font = Enum.Font.SourceSansBold
+RejoinIcon.TextSize = 16
+RejoinIcon.TextColor3 = Color3.fromRGB(80, 80, 80)
+RejoinIcon.BackgroundTransparency = 1
+RejoinIcon.Parent = localRejoinButton
+
+localRejoinButton.MouseButton1Click:Connect(function()
+    if #Players:GetPlayers() <= 1 then
+        Players.LocalPlayer:Kick("\nRejoining...")
+        wait()
+		TeleportService:Teleport(PlaceId, Players.LocalPlayer)
+    else
+        TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
+    end
+end)
+
+-- Create Auto Rejoin Button
+local localAutoRejoinButton = createInteractiveButton(homePage, "Auto Rejoin", "-", 2)
+local AutoRejoinIcon = Instance.new("TextLabel")
+AutoRejoinIcon.Size = UDim2.new(0, 20, 1, 0)
+AutoRejoinIcon.Position = UDim2.new(1, -35, 0, 0)
+AutoRejoinIcon.Text = "OFF"
+AutoRejoinIcon.Font = Enum.Font.SourceSansBold
+AutoRejoinIcon.TextSize = 16
+AutoRejoinIcon.TextColor3 = Color3.fromRGB(80, 80, 80)
+AutoRejoinIcon.BackgroundTransparency = 1
+AutoRejoinIcon.Parent = localAutoRejoinButton
+
+localAutoRejoinButton.MouseButton1Click:Connect(function()
+    toggles.EnableAutoRejoin = not toggles.EnableAutoRejoin
+    AutoRejoinIcon.Text = (AutoRejoinIcon.Text == "OFF" and "ON" or "OFF")
+    AutoRejoinIcon.TextColor3 = AutoRejoinIcon.Text == "ON" and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(80, 80, 80)
+    
+    if toggles.EnableAutoRejoin then
+        if not autoRejoinLoop or coroutine.status(autoRejoinLoop) ~= "running" then
+            autoRejoinLoop = task.spawn(handleAutoRejoin)
+            print("Auto-rejoin diaktifkan. Memulai loop pemeriksaan.")
+        end
+    else
+        -- Jika auto-rejoin dinonaktifkan, loop akan berhenti secara alami pada iterasi berikutnya
+        print("Auto-rejoin dinonaktifkan.")
+    end
+end)
+
 -- Create Fly Button
 local localFlyButton = createInteractiveButton(homePage, "Flying", "You can activate it by pressing N/this botton", 3)
 local flyIcon = Instance.new("TextLabel")
@@ -423,7 +490,7 @@ flyIcon.Position = UDim2.new(1, -35, 0, 0)
 flyIcon.Text = "OFF"
 flyIcon.Font = Enum.Font.SourceSansBold
 flyIcon.TextSize = 16
-flyIcon.TextColor3 = theme.MutedTextColor
+flyIcon.TextColor3 = Color3.fromRGB(80, 80, 80)
 flyIcon.BackgroundTransparency = 1
 flyIcon.Parent = localFlyButton
 
@@ -455,7 +522,7 @@ walkSpeedIcon.Position = UDim2.new(1, -35, 0, 0)
 walkSpeedIcon.Text = "OFF"
 walkSpeedIcon.Font = Enum.Font.SourceSansBold
 walkSpeedIcon.TextSize = 16
-walkSpeedIcon.TextColor3 = theme.MutedTextColor
+walkSpeedIcon.TextColor3 = Color3.fromRGB(80, 80, 80)
 walkSpeedIcon.BackgroundTransparency = 1
 walkSpeedIcon.Parent = localWalkSpeedButton
 
