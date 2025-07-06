@@ -47,7 +47,7 @@ local theme = {
     BackgroundColor = Color3.fromRGB(35, 35, 35),
     SecondaryColor = Color3.fromRGB(45, 45, 45),
     TertiaryColor = Color3.fromRGB(28, 28, 28),
-    AccentColor = Color3.fromRGB(220, 20, 60), -- Red for the selected item underline
+    AccentColor = Color3.fromRGB(220, 20, 60),
     TextColor = Color3.fromRGB(240, 240, 240),
     MutedTextColor = Color3.fromRGB(180, 180, 180),
     Font = Enum.Font.SourceSans,
@@ -176,11 +176,13 @@ end)
 
 
 -- 5. Sidebar (Left Navigation)
-local sidebar = Instance.new("Frame")
+local sidebar = Instance.new("ScrollingFrame")
 sidebar.Name = "Sidebar"
 sidebar.Size = UDim2.new(0, 160, 1, 0)
 sidebar.BackgroundColor3 = theme.SecondaryColor
 sidebar.BorderSizePixel = 0
+sidebar.ScrollBarThickness = 5
+sidebar.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
 sidebar.Parent = mainContent
 
 local sidebarLayout = Instance.new("UIListLayout")
@@ -202,7 +204,8 @@ contentFrame.Parent = mainContent
 local contentPadding = Instance.new("UIPadding")
 contentPadding.PaddingTop = UDim.new(0, 10)
 contentPadding.PaddingLeft = UDim.new(0, 15)
-contentPadding.PaddingRight = UDim.new(0, 15)
+contentPadding.PaddingRight = UDim.new(0, 10)
+contentPadding.PaddingBottom = UDim.new(0, 10)
 contentPadding.Parent = contentFrame
 
 -- Data for Navigation Buttons
@@ -277,8 +280,8 @@ for i, data in ipairs(navButtonsData) do
     page.BackgroundTransparency = 1
     page.BorderSizePixel = 0
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 0) -- Auto-sizing canvas
     page.ScrollBarThickness = 5
+    page.ScrollBarImageColor3 = theme.AccentColor
     page.Parent = contentFrame
     pageFrames[name] = page
     
@@ -286,6 +289,14 @@ for i, data in ipairs(navButtonsData) do
     pageLayout.Padding = UDim.new(0, 10)
     pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
     pageLayout.Parent = page
+
+	local pagePadding = Instance.new("UIPadding")
+	pagePadding.PaddingRight = UDim.new(0, 10)
+	pagePadding.Parent = page
+
+    pageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        page.CanvasSize = UDim2.new(0, 0, 0, pageLayout.AbsoluteContentSize.Y)
+    end)
     
     local pageTitle = Instance.new("TextLabel")
     pageTitle.Name = "PageTitle"
@@ -303,6 +314,10 @@ for i, data in ipairs(navButtonsData) do
         switchPage(name)
     end)
 end
+
+sidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	sidebar.CanvasSize = UDim2.new(0, 0, 0, sidebarLayout.AbsoluteContentSize.Y)
+end)
 
 --== Function ==--
 local toggles = { EnableFlight = false, EnableWalkSpeed = false }
